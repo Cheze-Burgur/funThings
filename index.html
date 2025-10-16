@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Fun Things by Cheze</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        :root {
+            --header: #ffffff;
+            --subheader: #cccccc;
+            --link: #ff9100;
+        }
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom, #050068 0%, #000000 100%);
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            color: white;
+        }
+
+        h1 {
+            color: var(--header);
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        h2 {
+            color: var(--subheader);
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .head {
+            margin-bottom: 30px;
+        }
+
+        .footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+            padding: 10px 0;
+            background-color: rgba(59, 59, 59, 0.5);
+            color: white;
+        }
+
+        a {
+            color: var(--link);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline dashed;
+        }
+
+        #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .linkcontainer {
+            background-color: rgba(255, 255, 255, 0.06);
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            padding: 16px;
+            width: 220px;
+            height: 100px;
+            text-align: center;
+            transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .linkcontainer * {
+            cursor: inherit;
+        }
+
+        .linkcontainer strong {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--link);
+            margin: 0;
+        }
+
+        .linkcontainer:hover {
+            background-color: rgba(255, 255, 255, 0.16);
+            border-color: rgba(255, 255, 255, 0.30);
+            transform: translateY(-6px) scale(1.02);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.60);
+        }
+
+        .linkcontainer:focus-visible {
+            outline: 3px solid rgba(255, 145, 0, 0.18);
+            outline-offset: 4px;
+        }
+
+        .desc {
+            font-size: 14px;
+            color: #ffffff;
+            margin-top: 8px;
+            opacity: 0.95;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="head">
+        <h1>Fun Things by Cheze</h1>
+        <h2>Home</h2>
+    </div>
+
+    <div id="container">
+        <div class="row">
+            <div class="linkcontainer" data-url="https://github.com/Cheze-Burgur/funThings/tree/main/AvCnuke">
+                <p style="color:var(--link); margin:0;"><strong>AvC Nuke</strong></p>
+                <p class="desc">Based off the nuke from Animation vs Coding (Python)</p>
+            </div>
+            <div class="linkcontainer" data-url="https:cheze-burgur.github.io/pixelArtMaker">
+                <p style="color:var(--link); margin:0;"><strong>Pixel Art Maker</strong></p>
+                <p class="desc">Mostly-functional pixel art canvas, complete with all the necessary tools. (HTML, CSS, JS)</p>
+            </div>
+            <div class="linkcontainer">
+                <p style="color:var(--link); margin:0;"><strong>Project 3</strong></p>
+                <p class="desc">Description</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="linkcontainer">
+                <p style="color:var(--link); margin:0;"><strong>Project 4</strong></p>
+                <p class="desc">Description</p>
+            </div>
+            <div class="linkcontainer">
+                <p style="color:var(--link); margin:0;"><strong>Project 5</strong></p>
+                <p class="desc">Description</p>
+            </div>
+            <div class="linkcontainer">
+                <p style="color:var(--link); margin:0;"><strong>Project 6</strong></p>
+                <p class="desc">Description</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="linkcontainer">
+                <p style="color:var(--link); margin:0;"><strong>Project 7</strong></p>
+                <p class="desc">Description</p>
+            </div>
+            <div class="linkcontainer">
+                <p style="color:var(--link); margin:0;"><strong>Project 8</strong></p>
+                <p class="desc">Description</p>
+            </div>
+            <div class="linkcontainer">
+                <p style="color:var(--link); margin:0;"><strong>Project 9</strong></p>
+                <p class="desc">Description</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="linkcontainer">
+                <p style="color:var(--link); margin:0;"><strong>Project 7</strong></p>
+                <p class="desc">Description</p>
+            </div>
+            <div class="linkcontainer">
+                <p style="color:var(--link); margin:0;"><strong>Project 8</strong></p>
+                <p class="desc">Description</p>
+            </div>
+            <div class="linkcontainer">
+                <p style="color:var(--link); margin:0;"><strong>Project 9</strong></p>
+                <p class="desc">Description</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Made by <a href="https://github.com/Cheze-Burgur">@Cheze</a> ∙ Contact me if you have any ideas!
+    </div>
+
+    <script>
+        document.querySelectorAll('.linkcontainer').forEach(el => {
+            // Prefer data-url attribute, fall back to first anchor inside
+            const link = el.dataset.url || el.querySelector('a')?.href;
+            if (!link) return;
+
+            el.setAttribute('role', 'link');
+            el.tabIndex = 0;
+
+            const openLink = () => {
+                const w = window.open(link, '_blank');
+                if (w) w.opener = null;
+            };
+
+            el.addEventListener('click', openLink);
+            el.addEventListener('keydown', e => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openLink(); }
+            });
+        });
+    </script>
+</body>
+
+</html>
