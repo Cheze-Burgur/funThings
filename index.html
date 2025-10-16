@@ -5,7 +5,6 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Fun Things by Cheze</title>
-    <meta charset="utf-8">
     <meta name="author" content="Cheze_Burgur">
     <meta name="description" content="All the cool things that Cheze_Burgur has made!">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -73,11 +72,15 @@
             justify-content: center;
             gap: 20px;
             padding: 20px;
+            padding-bottom:60px;
         }
 
         .row {
             display: flex;
             gap: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .linkcontainer {
@@ -125,6 +128,16 @@
             margin-top: 8px;
             opacity: 0.95;
         }
+
+        @media {
+            .row {
+                flex-direction: column;
+                align-items: center;
+            }
+            .linkcontainer {
+                width: 90%;
+            }
+        }
     </style>
 </head>
 
@@ -140,7 +153,7 @@
                 <p style="color:var(--link); margin:0;"><strong>AvC Nuke</strong></p>
                 <p class="desc">Based off the nuke from Animation vs Coding (Python)</p>
             </div>
-            <div class="linkcontainer" data-url="https:cheze-burgur.github.io/pixelArtMaker">
+            <div class="linkcontainer" data-url="data-url="https://cheze-burgur.github.io/pixelArtMaker"">
                 <p style="color:var(--link); margin:0;"><strong>Pixel Art Maker</strong></p>
                 <p class="desc">Mostly-functional pixel art canvas, complete with all the necessary tools. (HTML, CSS,
                     JS)</p>
