@@ -1,0 +1,1227 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Platform</title>
+    <style>
+        /* ===== Root ===== */
+        :root {
+            --bg: #0b1221;
+            --fg: #e6f1ff;
+            --accent: #ffb86b;
+            --muted: #7b8ca5;
+            --ui-bg: rgba(255, 255, 255, 0.06);
+        }
+
+        /* ===== Global ===== */
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            font-family: Inter, ui-sans-serif, system-ui, Segoe UI, Roboto, 'Helvetica Neue', Arial;
+        }
+
+        body {
+            background: linear-gradient(180deg, #071228 0%, #0b1221 60%);
+            color: var(--fg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ===== Main container ===== */
+        .wrap {
+            width: 100%;
+            max-width: 1000px;
+            margin: 28px;
+            padding: 18px;
+            box-sizing: border-box;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        h1 {
+            font-size: 20px;
+            margin: 0;
+        }
+
+        p.controls {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* ===== Game canvas ===== */
+        .gameWrap {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
+            box-shadow: 0 10px 30px rgba(2, 6, 23, 0.6);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 600px;
+            background: transparent;
+        }
+
+        /* HUD */
+        .hud {
+            position: absolute;
+            left: 12px;
+            top: 12px;
+            padding: 8px 12px;
+            background: var(--ui-bg);
+            backdrop-filter: blur(6px);
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .hud.lives {
+            left: auto;
+            right: 12px;
+        }
+
+        .hud.coins {
+            top: 50px;
+            left: 12px;
+            font-size: 14px;
+        }
+
+        /* ===== Buttons ===== */
+        button {
+            font-size: 1rem;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            background: var(--accent);
+            color: #222;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        button.pressed {
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: scale(0.95);
+        }
+
+        /* ===== Mobile controls ===== */
+        .controlWrap {
+            display: none;
+            position: absolute;
+            left: 10px;
+            bottom: 18px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--fg);
+            touch-action: none;
+            user-select: none;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.1s ease, transform 0.1s ease;
+        }
+
+        .btn.jump {
+            width: 84px;
+        }
+
+        /* ===== Menus ===== */
+        .menu {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            color: white;
+            display: none;
+            /* hidden by default; shown via JS when needed */
+            flex-direction: column;
+            gap: 14px;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .menuBtn {
+            padding: 12px 28px;
+            background: var(--accent);
+            border: none;
+            border-radius: 8px;
+            color: black;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 8px;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            display: none;
+            /* hidden by default */
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            /* above #mainMenu (10000) so modal overlays menus */
+        }
+
+        .modalContent {
+            background: #1b2838;
+            color: white;
+            padding: 24px;
+            border-radius: 12px;
+            width: 320px;
+            text-align: center;
+        }
+
+        /* Main menu */
+        #mainMenu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(11, 18, 33, 0.9);
+            color: var(--fg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: Inter, sans-serif;
+            font-size: 2rem;
+            z-index: 10000;
+            display: flex;
+            /* show main menu on load */
+        }
+
+        /* Game over screen */
+        #gameOverScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(11, 18, 33, 0.9);
+            color: var(--fg);
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: Inter, sans-serif;
+            font-size: 2rem;
+            z-index: 10000;
+            display: none;
+        }
+
+        #restartBtn {
+            margin-top: 24px;
+            padding: 12px 24px;
+            font-size: 1.2rem;
+            border-radius: 8px;
+            border: none;
+            background: var(--accent);
+            color: #222;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        /* ===== Footer ===== */
+        footer {
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 13px;
+            text-align: center;
+        }
+
+        /* ===== Responsive ===== */
+        @media (max-width: 640px) {
+            canvas {
+                height: 480px;
+            }
+
+            .btn {
+                width: 56px;
+                height: 56px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Main menu -->
+    <div id="mainMenu">
+        <h1>PLATFORM</h1>
+        <p>By Cheze</p>
+        <button class="menuBtn" id="startBtn">Start Game</button>
+        <button class="menuBtn" id="playerBtn">Customize Player</button>
+        <button class="menuBtn" id="editorBtn">Level Editor</button>
+        <button class="menuBtn" id="controlsBtn">Controls</button>
+    </div>
+
+    <!-- Pause menu -->
+    <div class="menu" id="pauseMenu">
+        <p>Paused</p>
+        <button class="menuBtn" id="resumeBtn">Resume</button>
+        <button class="menuBtn" id="pauseControlsBtn">Controls</button>
+        <button class="menuBtn" id="mainMenuBtn">Quit to Menu</button>
+    </div>
+
+    <!-- Customize player menu -->
+    <div class="menu" id="playerMenu">
+        <div style="display:flex;gap:16px;align-items:flex-start;">
+            <div style="display:flex;flex-direction:column;gap:8px;">
+                <label for="primaryColor">Primary Color:</label>
+                <select id="primaryColor">
+                    <option value="red">Red</option>
+                    <option value="orange">Orange</option>
+                    <option value="yellow">Yellow</option>
+                    <option value="green">Green</option>
+                    <option value="blue">Blue</option>
+                    <option value="purple">Purple</option>
+                    <option value="pink">Pink</option>
+                    <option value="black">Black</option>
+                    <option value="white">White</option>
+                </select>
+                <label for="SecondaryColor">Secondary Color:</label>
+                <select id="SecondaryColor">
+                    <option value="red">Red</option>
+                    <option value="orange">Orange</option>
+                    <option value="yellow">Yellow</option>
+                    <option value="green">Green</option>
+                    <option value="blue">Blue</option>
+                    <option value="purple">Purple</option>
+                    <option value="pink">Pink</option>
+                    <option value="black">Black</option>
+                    <option value="white">White</option>
+                </select>
+                <div style="margin-top:8px;"><button class="menuBtn" id="playerBackBtn">Back</button></div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:8px;min-width:40px;">
+                <canvas id="playerPreview" width="32" height="44"
+                    style="border-radius:8px;background:transparent;width:32px;height:44px;"></canvas>
+                <div style="color:var(--muted);font-size:13px;">Preview</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Editor (WIP) -->
+    <div class="menu" id="editorMenu">
+        <p>Level Editor (WIP)</p>
+        <input type="text" value="Coming Soon!">
+        <button class="menuBtn" id="editorBackBtn">Back</button>
+    </div>
+
+    <!-- Controls -->
+    <div class="modal" id="controlsModal">
+        <div class="modalContent">
+            <p>Controls</p>
+            <ul>
+                <li>Move Left: Left / A</li>
+                <li>Move Right: Right / D</li>
+                <li>Jump: Up / W / Space</li>
+                <li>Reset Level: R / Reset Button</li>
+            </ul>
+            <button class="menuBtn" id="controlsBackBtn">Back</button>
+        </div>
+    </div>
+
+    <!-- Game over -->
+    <div class="menu" id="gameOverScreen">
+        <p>Game Over</p>
+        <button id="restartBtn">Restart</button>
+    </div>
+
+    <div class="wrap">
+        <header>
+            <div>
+                <h1>Platform</h1>
+            </div>
+            <div>
+                <button id="resetBtn">Reset</button>
+            </div>
+        </header>
+
+        <div class="gameWrap">
+            <canvas id="game"></canvas>
+            <div class="hud" id="hud">Score: <span id="score">0</span></div>
+            <div class="hud lives" id="hudRight">Lives: <span id="lives">3</span></div>
+            <div class="hud coins">Coins: <span id="coins">0</span>
+            </div>
+
+            <!-- Mobile controls -->
+            <div class="controlWrap" id="touchControls">
+                <div class="btn left" id="leftBtn">◀</div>
+                <div class="btn right" id="rightBtn">▶</div>
+                <div class="btn jump" id="jumpBtn">▲</div>
+            </div>
+        </div>
+
+        <footer>
+            Yeah
+            <input type="checkbox" id="debugToggle"><label for="debugToggle"> Debug</label>
+        </footer>
+    </div>
+
+    <script>
+        /* ===== Utils and Setup ===== */
+        const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+        const canvas = document.getElementById('game');
+        const ctx = canvas.getContext('2d');
+        let DPR = Math.min(window.devicePixelRatio || 1, 2);
+
+        function resizeCanvas() {
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = Math.floor(rect.width * DPR);
+            canvas.height = Math.floor(rect.height * DPR);
+            ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        /* ===== DOM ELEMENTS ===== */
+        const scoreEl = document.getElementById('score');
+        const coinsEl = document.getElementById('coins');
+        const livesEl = document.getElementById('lives');
+        const mainMenu = document.getElementById('mainMenu');
+        const pauseMenu = document.getElementById('pauseMenu');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const levelEditorMenu = document.getElementById('editorMenu');
+        const playerMenu = document.getElementById('playerMenu');
+        const controlsModal = document.getElementById('controlsModal');
+        const restartBtn = document.getElementById('restartBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const bodyColorPicker = document.getElementById('primaryColor');
+        const eyeColorPicker = document.getElementById('SecondaryColor');
+        const debugToggle = document.getElementById('debugToggle');
+        const touchControls = document.getElementById('touchControls');
+        const leftBtn = document.getElementById('leftBtn');
+        const rightBtn = document.getElementById('rightBtn');
+        const jumpBtn = document.getElementById('jumpBtn');
+
+        /* ===== Inputs ===== */
+        const keys = { left: 0, right: 0, jump: 0 };
+        window.addEventListener('keydown', e => {
+            if (['ArrowLeft', 'a', 'A'].includes(e.key)) keys.left = 1;
+            if (['ArrowRight', 'd', 'D'].includes(e.key)) keys.right = 1;
+            if (['ArrowUp', 'w', 'W', ' '].includes(e.key)) keys.jump = 1;
+            if (e.key === 'r' || e.key === 'R') {
+                // manual reset to spawn / checkpoint
+                respawn();
+            }
+        });
+        window.addEventListener('keyup', e => {
+            if (['ArrowLeft', 'a', 'A'].includes(e.key)) keys.left = 0;
+            if (['ArrowRight', 'd', 'D'].includes(e.key)) keys.right = 0;
+            if (['ArrowUp', 'w', 'W', ' '].includes(e.key)) keys.jump = 0;
+        });
+
+        /* ===== Touch to Mouse Fallbacks ===== */
+        function bindTouchButton(btnEl, keyName) {
+            if (!btnEl) return;
+            function start(e) { e.preventDefault(); keys[keyName] = 1; btnEl.classList.add('pressed'); }
+            function end(e) { e.preventDefault(); keys[keyName] = 0; btnEl.classList.remove('pressed'); }
+            btnEl.addEventListener('touchstart', start, { passive: false });
+            btnEl.addEventListener('touchend', end, { passive: false });
+            btnEl.addEventListener('touchcancel', end, { passive: false });
+            btnEl.addEventListener('mousedown', () => { keys[keyName] = 1; btnEl.classList.add('pressed'); });
+            btnEl.addEventListener('mouseup', () => { keys[keyName] = 0; btnEl.classList.remove('pressed'); });
+            btnEl.addEventListener('mouseleave', () => { keys[keyName] = 0; btnEl.classList.remove('pressed'); });
+        }
+        bindTouchButton(leftBtn, 'left');
+        bindTouchButton(rightBtn, 'right');
+        bindTouchButton(jumpBtn, 'jump');
+
+        function updateTouchVisibility() {
+            const show = window.innerWidth < 900;
+            touchControls.style.display = show ? 'flex' : 'none';
+            touchControls.style.zIndex = show ? 1000 : -1;
+        }
+        window.addEventListener('resize', updateTouchVisibility);
+        updateTouchVisibility();
+
+        /* ===== World data ===== */
+        // . = empty, # = block, 
+        // S = start, G = goal
+        // c = small coin, C = large coin
+        // y = yellow jump orb, Y = yellow jump pad
+        // m = magenta jump orb, M = magenta jump pad
+        // r = red jump orb, R = red jump pad
+        // b = blue jump orb, B = blue jump pad
+        // ^ = spike up, v = spike down, o = small sawblade, O = large sawblade
+        // P = portal, ! = checkpoint
+        const TILE = 48;
+        const levelData = [
+            "##########################################",
+            ".........................................G",
+            ".........................................G",
+            "..........#################..............G",
+            "...................Y.M.R.B...............G",
+            ".........................................G",
+            ".........................................G",
+            ".........................................G",
+            ".........................................G",
+            ".........................................G",
+            ".S...#.c.C.y.m.r.b.Y.M.R.B.^.v.o.O.!.P...G",
+            ".........................................G",
+            "##########################################",
+        ];
+        const levelWidth = levelData.reduce((m, r) => Math.max(m, r.length), 0);
+        const world = { tiles: levelData.map(r => r.padEnd(levelWidth, '.').split('')), width: levelWidth, height: levelData.length };
+
+        /* ===== GAME STATE ===== */
+        let player = { x: 0, y: 0, w: 32, h: 44, vx: 0, vy: 0, onGround: false, facing: 1 };
+        let camera = { x: 0, y: 0 };
+        let score = 0;
+        let coins = 0;
+        let lives = 3;
+        let isGameOver = false;
+        let gameRunning = false;
+        let paused = false;
+        let checkpoint = null; // { x, y }
+        let checkpointScore = 0;
+        let checkpointCoins = 0;
+        let modeFlying = false;
+        let gravityInverted = false;
+
+        /* edge-trigger flags */
+        let wasOnPortal = false;
+        let wasOnYOrb = false, wasOnMOrb = false, wasOnROrb = false, wasOnBOrb = false;
+        let wasOnYPad = false, wasOnMPad = false, wasOnRPad = false, wasOnBPad = false;
+
+        /* blinking */
+        let blinkTimer = 0, nextBlinkAt = 2 + Math.random() * 4, isBlinking = false, blinkRemaining = 0;
+        const BLINK_DURATION = 0.12;
+
+        /* colors */
+        let bodyColor = "#ffb86b";
+        let eyeColor = "#111111";
+
+        /* load saved color selections */
+        try {
+            const savedBody = localStorage.getItem('platform_bodyColorValue');
+            const savedEye = localStorage.getItem('platform_eyeColorValue');
+            if (savedBody) { bodyColorValue = savedBody; bodyColorPicker.value = savedBody; bodyColor = mapColorValue(savedBody, false); }
+            if (savedEye) { eyeColorValue = savedEye; eyeColorPicker.value = savedEye; eyeColor = mapColorValue(savedEye, true); }
+        } catch (e) { console.warn('Could not load colors', e); }
+
+        /* Set initial player pos */
+        function findSpawn() {
+            for (let y = 0; y < world.height; y++) {
+                for (let x = 0; x < world.width; x++) {
+                    if (world.tiles[y][x] === 'S') {
+                        player.x = x * TILE;
+                        player.y = y * TILE;
+                        return;
+                    }
+                }
+            }
+        }
+        findSpawn();
+        camera.x = player.x; camera.y = player.y;
+
+        /* ===== Physics ===== */
+        const GRAV = 1600;
+        const MOVE_ACC = 4200;
+        const MAX_SPEED = 300;
+        const JUMP_V = -560;
+
+        /* ===== Debug ===== */
+        const devInfo = document.createElement('div');
+        devInfo.id = 'devOverlay';
+        devInfo.style.position = 'absolute';
+        devInfo.style.right = '12px';
+        devInfo.style.bottom = '12px';
+        devInfo.style.padding = '6px 8px';
+        devInfo.style.background = 'rgba(0,0,0,0.6)';
+        devInfo.style.color = 'white';
+        devInfo.style.fontSize = '12px';
+        devInfo.style.borderRadius = '6px';
+        devInfo.style.zIndex = 9999;
+        devInfo.style.pointerEvents = 'none';
+        document.body.appendChild(devInfo);
+        const debugSaved = localStorage.getItem('platform_debug') === '1';
+        debugToggle.checked = debugSaved;
+        devInfo.style.display = debugSaved ? 'block' : 'none';
+        debugToggle.addEventListener('change', (e) => {
+            const on = !!e.target.checked;
+            devInfo.style.display = on ? 'block' : 'none';
+            localStorage.setItem('platform_debug', on ? '1' : '0');
+        });
+
+        /* ===== World Integrity ===== */
+        function ensureWorldIntegrity() {
+            try {
+                const ok = Array.isArray(world.tiles) &&
+                    world.tiles.length === world.height &&
+                    world.tiles.every(r => Array.isArray(r) && r.length === world.width);
+                if (!ok) {
+                    console.warn('World corrupted — rebuilding');
+                    setTimeout(() => { world.tiles = levelData.map(r => r.padEnd(levelWidth, '.').split('')); }, 1000)
+                }
+            } catch (err) {
+                console.warn('Error checking world integrity — rebuilding', err);
+                setTimeout(() => { world.tiles = levelData.map(r => r.padEnd(levelWidth, '.').split('')); }, 1000)
+            }
+        }
+
+        /* ===== Tile Utils ===== */
+        function tileAt(px, py) {
+            const tx = Math.floor(px / TILE);
+            const ty = Math.floor(py / TILE);
+            if (tx < 0 || ty < 0 || tx >= world.width || ty >= world.height) return '#';
+            return world.tiles[ty][tx];
+        }
+        function isSolidAt(tx, ty) {
+            if (tx < 0 || ty < 0 || tx >= world.width || ty >= world.height) return true;
+            return world.tiles[ty][tx] === '#';
+        }
+
+        /* ===== Draw Helpers ===== */
+        function roundRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
+
+        function getAccentColor(bodyColorVal) {
+            const accentMap = {
+                red: '#cc2222', orange: '#cc8800', yellow: '#ccaa00', green: '#228800',
+                blue: '#0088cc', purple: '#8800cc', pink: '#cc0066', black: '#555555', white: '#cccccc',
+            };
+            return accentMap[bodyColorVal] || '#333333';
+        }
+
+        function mapColorValue(val, isEye) {
+            if (!val || val === 'default') return isEye ? '#111111' : '#ffb86b';
+            const map = {
+                red: '#ff5555', orange: '#ffb86b', yellow: '#ffd166', green: '#34b501',
+                blue: '#34b5ff', purple: '#ab0fd7', pink: '#ff6fa3', black: '#111111', white: '#ffffff'
+            };
+            return map[val] || val;
+        }
+
+        /* player draw */
+        function drawPlayer(ctx, x, y, w, h, facing, bodyCol, bodyColorVal, eyeCol, blink = false) {
+            const accentCol = getAccentColor(bodyColorVal);
+            ctx.save();
+            if (facing < 0) { ctx.translate(x + w, y); ctx.scale(-1, 1); x = 0; y = 0; } else { ctx.translate(x, y); x = 0; y = 0; }
+            // shadow
+            ctx.beginPath();
+            ctx.ellipse(x + w / 2, y + h + Math.max(4, h * 0.14), w * 0.5, Math.max(6, h * 0.18), 0, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(0,0,0,0.22)';
+            ctx.fill();
+
+            // body
+            const bodyColorUse = bodyCol || '#ffb86b';
+            roundRect(ctx, x, y, w, h, Math.max(6, w * 0.15));
+            ctx.fillStyle = bodyColorUse;
+            ctx.fill();
+            ctx.fillStyle = 'rgba(255,255,255,0.12)';
+            roundRect(ctx, x + 2, y + 2, w * 0.4, h * 0.22, 4);
+            ctx.fill();
+            const acc = accentCol || '#111';
+            const stripeW = w * 0.72;
+            const stripeH = Math.max(4, h * 0.22);
+            const sx = x + (w - stripeW) / 2;
+            const sy = y + h * 0.5;
+            roundRect(ctx, sx, sy, stripeW, stripeH, stripeH * 0.35);
+            ctx.fillStyle = acc; ctx.fill();
+
+            // eye
+            const eyeX = x + w * 0.68;
+            const eyeY = y + h * 0.28;
+            const eyeR = Math.max(2, w * 0.08);
+            if (blink) {
+                ctx.fillStyle = acc;
+                const bw = eyeR * 2.2; const bh = Math.max(1, eyeR * 0.5);
+                roundRect(ctx, eyeX - bw / 2, eyeY - bh / 2, bw, bh, bh * 0.5); ctx.fill();
+            } else {
+                ctx.beginPath(); ctx.arc(eyeX, eyeY, eyeR, 0, Math.PI * 2); ctx.fillStyle = '#fff'; ctx.fill();
+                ctx.beginPath(); ctx.arc(eyeX, eyeY, Math.max(1, eyeR * 0.55), 0, Math.PI * 2); ctx.fillStyle = eyeCol; ctx.fill();
+                ctx.beginPath(); ctx.arc(eyeX - eyeR * 0.2, eyeY - eyeR * 0.25, Math.max(0.5, eyeR * 0.2), 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        /* parallax bg (wip) */
+        function drawParallax(cx, cy, w, h) {
+            const layers = [{ color: '#14233c', speed: 0.1, size: 20 }, { color: '#2a4a7e', speed: 0.2, size: 12 }];
+            layers.forEach(layer => {
+                ctx.fillStyle = layer.color;
+                const offsetX = -cx * layer.speed;
+                const offsetY = -cy * layer.speed;
+                const spacing = layer.size * 3;
+                for (let y = 0; y < h + spacing; y += spacing) {
+                    for (let x = 0; x < w + spacing; x += spacing) {
+                        const drawX = x + offsetX;
+                        const drawY = y + offsetY;
+                        ctx.beginPath();
+                        ctx.ellipse(drawX, drawY, layer.size, layer.size, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            });
+        }
+
+        /* ===== Reset and Checkpoints ===== */
+
+        /* menu helper */
+        function hideAllMenus() {
+            pauseMenu.style.display = "none";
+            gameOverScreen.style.display = "none";
+            controlsModal.style.display = "none";
+            playerMenu.style.display = "none";
+            levelEditorMenu.style.display = "none";
+            paused = false;
+        }
+
+        /* respawn */
+        function respawn() {
+            if (checkpoint) {
+                // set position to checkpoint and restore stats
+                player.x = checkpoint.x * TILE;
+                player.y = checkpoint.y * TILE;
+                score = checkpointScore;
+                coins = checkpointCoins;
+            } else {
+                // fallback to spawn
+                findSpawn();
+            }
+
+            // physics & flags
+            player.vx = 0; player.vy = 0; player.onGround = false; player.facing = 1;
+            modeFlying = false;
+            gravityInverted = false;
+            wasOnPortal = false;
+            wasOnYOrb = wasOnMOrb = wasOnROrb = wasOnBOrb = false;
+            wasOnYPad = wasOnMPad = wasOnRPad = wasOnBPad = false;
+
+            // camera
+            camera.x = player.x;
+            camera.y = player.y;
+
+            // hide menus
+            isGameOver = false;
+            hideAllMenus();
+
+            lastTime = performance.now();
+            updateHUD();
+        }
+
+        /* full reset */
+        function resetGame() {
+            world.tiles = levelData.map(r => r.padEnd(levelWidth, '.').split(''));
+            score = 0;
+            coins = 0;
+            lives = 3;
+            checkpoint = null;
+            checkpointScore = 0;
+            checkpointCoins = 0;
+            gravityInverted = false;
+            modeFlying = false;
+            findSpawn();
+
+            gameRunning = true;
+            isGameOver = false;
+
+            respawn();
+            hideAllMenus();
+            updateHUD();
+        }
+
+
+        /* death handling */
+        function playerDeath() {
+            lives = Math.max(0, lives - 1);
+            updateHUD();
+            if (lives <= 0) {
+                isGameOver = true;
+                gameOverScreen.style.display = 'flex';
+                gameRunning = false;
+                return;
+            }
+            // respawn
+            respawn();
+        }
+
+        /* HUD helper */
+        function updateHUD() {
+            scoreEl.textContent = score;
+            coinsEl.textContent = coins;
+            livesEl.textContent = lives;
+        }
+
+        /* ===== Event Handlers ===== */
+        document.getElementById("startBtn").onclick = () => { mainMenu.style.display = "none"; gameRunning = true; };
+        document.getElementById("playerBtn").onclick = () => { mainMenu.style.display = "none"; playerMenu.style.display = "flex"; try { drawPreview(); } catch (e) { } };
+        document.getElementById("editorBtn").onclick = () => { mainMenu.style.display = "none"; levelEditorMenu.style.display = "flex"; };
+        document.getElementById("controlsBtn").onclick = () => { controlsModal.style.display = "flex"; };
+
+        document.addEventListener("keydown", e => {
+            if (e.key === "Escape" && gameRunning) {
+                paused = !paused;
+                pauseMenu.style.display = paused ? "flex" : "none";
+            }
+        });
+        document.getElementById("resumeBtn").onclick = () => { paused = false; pauseMenu.style.display = "none"; };
+        document.getElementById("mainMenuBtn").onclick = () => { paused = false; gameRunning = false; pauseMenu.style.display = "none"; mainMenu.style.display = "flex"; };
+
+        document.getElementById("pauseControlsBtn").onclick = () => { controlsModal.style.display = "flex"; };
+        document.getElementById("controlsBackBtn").onclick = () => { controlsModal.style.display = "none"; };
+
+        document.getElementById("playerBackBtn").onclick = () => { playerMenu.style.display = "none"; mainMenu.style.display = "flex"; };
+        document.getElementById("editorBackBtn").onclick = () => { levelEditorMenu.style.display = "none"; mainMenu.style.display = "flex"; };
+
+        restartBtn.addEventListener('click', () => resetGame());
+        resetBtn.addEventListener('click', () => {
+            world.tiles = levelData.map(r => r.padEnd(levelWidth, '.').split(''));
+            respawn();
+            console.log('Level reset (tilemap rebuilt)');
+        });
+
+        /* ===== Customization UI ===== */
+        const previewCanvas = document.getElementById('playerPreview');
+        const previewCtx = previewCanvas ? previewCanvas.getContext('2d') : null;
+        function drawPreview() {
+            if (!previewCtx) return;
+            const pw = previewCanvas.width, ph = previewCanvas.height;
+            previewCtx.clearRect(0, 0, pw, ph);
+            const scale = Math.min(1, pw / player.w, ph / player.h);
+            const px = Math.round(pw / 2 - (player.w * scale) / 2);
+            const py = Math.round(ph / 2 - (player.h * scale) / 2);
+            drawPlayer(previewCtx, px, py, player.w * scale, player.h * scale, player.facing, bodyColor, bodyColorValue, eyeColor, false);
+        }
+        bodyColorPicker.oninput = e => {
+            bodyColorValue = e.target.value;
+            bodyColor = mapColorValue(bodyColorValue, false);
+            try { localStorage.setItem('platform_bodyColorValue', bodyColorValue); } catch (err) { }
+            drawPreview();
+        };
+        eyeColorPicker.oninput = e => {
+            eyeColorValue = e.target.value;
+            eyeColor = mapColorValue(eyeColorValue, true);
+            try { localStorage.setItem('platform_eyeColorValue', eyeColorValue); } catch (err) { }
+            drawPreview();
+        };
+        setTimeout(drawPreview, 50);
+
+        /* ===== Main Loop ===== */
+        let lastTime = performance.now();
+        function update(now) {
+            ensureWorldIntegrity();
+
+            const dt = Math.min((now - lastTime) / 1000, 1 / 30);
+            lastTime = now;
+
+            if (!gameRunning || paused) {
+                draw();
+                updateDebug();
+                requestAnimationFrame(update);
+                return;
+            }
+
+            if (isGameOver) {
+                draw();
+                updateDebug();
+                requestAnimationFrame(update);
+                return;
+            }
+
+            // face movement
+            let target = 0;
+            if (keys.left) target -= 1;
+            if (keys.right) target += 1;
+            if (target !== 0) player.facing = Math.sign(target);
+
+            // horizontal acceleration
+            player.vx += target * MOVE_ACC * dt;
+            player.vx = clamp(player.vx, -MAX_SPEED, MAX_SPEED);
+
+            // gravity & flight
+            const gravityDir = gravityInverted ? -1 : 1;
+            const effectiveJump = JUMP_V * gravityDir;
+            if (!modeFlying) {
+                player.vy += GRAV * gravityDir * dt;
+            } else {
+                if (keys.jump) {
+                    player.vy = clamp(player.vy - 1250 * gravityDir * dt, gravityDir > 0 ? -Infinity : -500, gravityDir > 0 ? 500 : Infinity);
+                } else {
+                    player.vy += GRAV * gravityDir * dt;
+                }
+                player.vx *= 0.95;
+            }
+
+            // friction & air control
+            if (!modeFlying) {
+                if (player.onGround && target === 0) { player.vx *= 0.5; if (Math.abs(player.vx) < 5) player.vx = 0; }
+                else if (!player.onGround) { if (target === 0) player.vx *= 0.75; else player.vx *= 0.95; }
+            }
+
+            // integrate position
+            let nx = player.x + player.vx * dt;
+            let ny = player.y + player.vy * dt;
+
+            // horizontal collision
+            if (player.vx !== 0) {
+                const dir = Math.sign(player.vx);
+                const aheadX = dir > 0 ? (nx + player.w) : nx;
+                const topY = player.y + 2;
+                const bottomY = player.y + player.h - 2;
+                for (let yP = topY; yP <= bottomY; yP += TILE / 2) {
+                    if (isSolidAt(Math.floor(aheadX / TILE), Math.floor(yP / TILE))) {
+                        nx = dir > 0 ? Math.floor(aheadX / TILE) * TILE - player.w - 0.001 : (Math.floor(aheadX / TILE) + 1) * TILE + 0.001;
+                        player.vx = 0;
+                        break;
+                    }
+                }
+            }
+
+            // vertical collision
+            player.onGround = false;
+            if (player.vy !== 0) {
+                const dir = Math.sign(player.vy);
+                const aheadY = dir > 0 ? (ny + player.h) : ny;
+                const leftX = nx + 2;
+                const rightX = nx + player.w - 2;
+                for (let xP = leftX; xP <= rightX; xP += TILE / 2) {
+                    if (isSolidAt(Math.floor(xP / TILE), Math.floor(aheadY / TILE))) {
+                        if (dir > 0) {
+                            ny = Math.floor(aheadY / TILE) * TILE - player.h - 0.001;
+                            player.onGround = true; player.vy = 0;
+                        } else {
+                            ny = (Math.floor(aheadY / TILE) + 1) * TILE + 0.001;
+                            player.vy = 0;
+                            if (gravityInverted) player.onGround = true;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            player.x = nx; player.y = ny;
+
+            /* ===== Tile Interactions ===== */
+            const centerX = Math.floor((player.x + player.w / 2) / TILE);
+            const centerY = Math.floor((player.y + player.h / 2) / TILE);
+            const tile = world.tiles[centerY] && world.tiles[centerY][centerX];
+
+            // coins
+            if (tile === 'c') { score += 10; world.tiles[centerY][centerX] = '.'; updateHUD(); }
+            if (tile === 'C') { score += 50; coins++; world.tiles[centerY][centerX] = '.'; updateHUD(); }
+
+            // checkpoint
+            if (tile === '!') {
+                if (!checkpoint || checkpoint.x !== centerX || checkpoint.y !== centerY) {
+                    checkpoint = { x: centerX, y: centerY };
+                    checkpointScore = score;
+                    checkpointCoins = coins;
+                    console.log('Checkpoint activated:', checkpoint);
+                }
+            }
+
+            // goal
+            if (tile === 'G') {
+                score += 250;
+                updateHUD();
+                world.tiles = levelData.map(r => r.padEnd(levelWidth, '.').split(''));
+                respawn();
+                console.log('Goal reached! Score:', score);
+            }
+
+            // hazard detection
+            const cx = Math.floor((player.x + player.w / 2) / TILE);
+            const cy = Math.floor((player.y + player.h / 2) / TILE);
+            const tileUnderPlayer = world.tiles[cy] && world.tiles[cy][cx];
+            if (['^', 'v', 'o', 'O'].includes(tileUnderPlayer)) {
+                console.log('Hazard hit at', cx, cy);
+                playerDeath();
+            }
+
+            // orb detection
+            let onYOrb = false, onMOrb = false, onROrb = false, onBOrb = false;
+            outerOrb:
+            for (let yOff = 0; yOff <= player.h; yOff += TILE / 2) {
+                for (let xOff = 0; xOff <= player.w; xOff += TILE / 2) {
+                    const tx = Math.floor((player.x + xOff) / TILE);
+                    const ty = Math.floor((player.y + yOff) / TILE);
+                    if (world.tiles[ty]) {
+                        const t = world.tiles[ty][tx];
+                        if (t === 'y') { onYOrb = true; break outerOrb; }
+                        if (t === 'm') { onMOrb = true; break outerOrb; }
+                        if (t === 'r') { onROrb = true; break outerOrb; }
+                        if (t === 'b') { onBOrb = true; break outerOrb; }
+                    }
+                }
+            }
+
+            // pads detection
+            let onYPad = false, onMPad = false, onRPad = false, onBPad = false;
+            outerPad:
+            for (let yOff = 0; yOff <= player.h; yOff += TILE / 2) {
+                for (let xOff = 0; xOff <= player.w; xOff += TILE / 2) {
+                    const tx = Math.floor((player.x + xOff) / TILE);
+                    const ty = Math.floor((player.y + yOff) / TILE);
+                    if (!world.tiles[ty]) continue;
+                    const t = world.tiles[ty][tx];
+                    if (!['Y', 'M', 'R', 'B'].includes(t)) continue;
+
+                    const aboveIsSolid = world.tiles[ty - 1] && world.tiles[ty - 1][tx] === '#';
+                    const padTopY = ty * TILE;
+                    const padBottomY = padTopY + TILE;
+
+                    if (aboveIsSolid) {
+                        // upside down pad: check top overlap
+                        if (player.y <= padTopY + 8 && player.y + player.h >= padTopY) {
+                            if (t === 'Y') onYPad = true;
+                            if (t === 'M') onMPad = true;
+                            if (t === 'R') onRPad = true;
+                            if (t === 'B') onBPad = true;
+                            break outerPad;
+                        }
+                    } else {
+                        // normal pad: check feet overlap
+                        if (player.y + player.h >= padBottomY - 8 && player.y + player.h <= padBottomY) {
+                            if (t === 'Y') onYPad = true;
+                            if (t === 'M') onMPad = true;
+                            if (t === 'R') onRPad = true;
+                            if (t === 'B') onBPad = true;
+                            break outerPad;
+                        }
+                    }
+                }
+            }
+
+            // pad bounce
+            if (onYPad && !wasOnYPad) { player.vy = effectiveJump * 1.5; player.onGround = false; }
+            else if (onMPad && !wasOnMPad) { player.vy = effectiveJump * 0.9; player.onGround = false; }
+            else if (onRPad && !wasOnRPad) { player.vy = effectiveJump * 1.8; player.onGround = false; }
+            else if (onBPad && !wasOnBPad) {
+                gravityInverted = !gravityInverted;
+                player.vy = effectiveJump * 0.9;
+                player.onGround = false;
+                console.log('Blue pad toggled gravity. Now inverted:', gravityInverted);
+            }
+            wasOnYPad = onYPad; wasOnMPad = onMPad; wasOnRPad = onRPad; wasOnBPad = onBPad;
+
+            // portal detection
+            let onPortal = false;
+            outerPortal:
+            for (let yOff = 0; yOff <= player.h; yOff += TILE / 2) {
+                for (let xOff = 0; xOff <= player.w; xOff += TILE / 2) {
+                    const tx = Math.floor((player.x + xOff) / TILE);
+                    const ty = Math.floor((player.y + yOff) / TILE);
+                    for (let checkY of [ty - 1, ty, ty + 1]) {
+                        if (world.tiles[checkY] && world.tiles[checkY][tx] === 'P') { onPortal = true; break outerPortal; }
+                    }
+                }
+            }
+            if (onPortal && !wasOnPortal) { modeFlying = !modeFlying; }
+            wasOnPortal = onPortal;
+
+            // jumping and orb activation
+            if (keys.jump) {
+                if (player.onGround) {
+                    player.vy = effectiveJump; player.onGround = false;
+                } else {
+                    if (onYOrb && !wasOnYOrb) { player.vy = effectiveJump; player.onGround = false; }
+                    else if (onMOrb && !wasOnMOrb) { player.vy = effectiveJump * 0.7; }
+                    else if (onROrb && !wasOnROrb) { player.vy = effectiveJump * 1.5; }
+                    else if (onBOrb && !wasOnBOrb) {
+                        gravityInverted = !gravityInverted;
+                        if (!modeFlying) player.vy = effectiveJump * 0.9;
+                        player.onGround = false;
+                        console.log('Blue orb toggled gravity. Now inverted:', gravityInverted);
+                    }
+                }
+            }
+            wasOnYOrb = onYOrb; wasOnMOrb = onMOrb; wasOnROrb = onROrb; wasOnBOrb = onBOrb;
+
+            // idle anim
+            const idle = !keys.left && !keys.right && Math.abs(player.vx) < 10 && player.onGround;
+            if (isBlinking) {
+                blinkRemaining -= dt;
+                if (blinkRemaining <= 0) { isBlinking = false; blinkRemaining = 0; nextBlinkAt = 2 + Math.random() * 4; blinkTimer = 0; }
+            } else if (idle) {
+                blinkTimer += dt;
+                if (blinkTimer >= nextBlinkAt) { isBlinking = true; blinkRemaining = BLINK_DURATION; blinkTimer = 0; }
+            } else {
+                blinkTimer = 0;
+            }
+
+            // camera smoothing
+            const screenW = canvas.width / DPR, screenH = canvas.height / DPR;
+            const targetCamX = player.x + player.w / 2 - screenW / 2;
+            const targetCamY = player.y + player.h / 2 - screenH / 2;
+            camera.x += (targetCamX - camera.x) * clamp(8 * dt, 0, 1);
+            camera.y += (targetCamY - camera.y) * clamp(8 * dt, 0, 1);
+            camera.x = clamp(camera.x, 0, world.width * TILE - screenW);
+            camera.y = clamp(camera.y, 0, world.height * TILE - screenH);
+
+            updateHUD();
+
+            draw();
+            updateDebug();
+
+            requestAnimationFrame(update);
+        }
+
+        /* ===== Rendering ===== */
+        function draw() {
+            const w = canvas.width / DPR, h = canvas.height / DPR;
+            ctx.clearRect(0, 0, w, h);
+
+            // sky gradient
+            const g = ctx.createLinearGradient(0, 0, 0, h);
+            g.addColorStop(0, '#081427'); g.addColorStop(1, '#08142700');
+            ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+
+            drawParallax(camera.x, camera.y, w, h);
+
+            // tilemap draw
+            for (let y = 0; y < world.height; y++) {
+                for (let x = 0; x < world.width; x++) {
+                    const t = world.tiles[y][x];
+                    const sx = x * TILE - camera.x;
+                    const sy = y * TILE - camera.y;
+                    if (sx + TILE < -50 || sx > w + 50 || sy + TILE < -50 || sy > h + 50) continue;
+
+                    if (t === '#') {
+                        // Block
+                        roundRect(ctx, sx + 2, sy + 2, TILE - 4, TILE - 4, 6);
+                        ctx.fillStyle = '#1b2b3f'; ctx.fill();
+                        ctx.fillStyle = '#2b3d56'; ctx.fillRect(sx + 6, sy + 6, TILE - 12, 6);
+                    } else if (t === 'G') {
+                        // Goal
+                        ctx.fillStyle = 'rgba(255,184,107,0.95)';
+                        ctx.fillRect(sx + TILE * 0.6, sy + 8, 6, TILE - 16);
+                        ctx.beginPath();
+                        ctx.moveTo(sx + TILE * 0.6 + 6, sy + 8);
+                        ctx.lineTo(sx + TILE * 0.95, sy + TILE / 2);
+                        ctx.lineTo(sx + TILE * 0.6 + 6, sy + TILE - 8);
+                        ctx.closePath(); ctx.fill();
+                    } else if (t === '!') {
+                        // Checkpoint
+                        const isActive = checkpoint && checkpoint.x === x && checkpoint.y === y;
+                        ctx.fillStyle = isActive ? '#34b501' : 'grey';
+                        const cx = sx + TILE * 0.5, cy = sy + TILE * 0.5, s = TILE * 0.28;
+                        ctx.beginPath();
+                        ctx.moveTo(cx, cy - s); ctx.lineTo(cx + s, cy); ctx.lineTo(cx, cy + s); ctx.lineTo(cx - s, cy); ctx.closePath();
+                        ctx.fill();
+                        ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 2; ctx.stroke();
+                        if (isActive) { ctx.strokeStyle = 'rgba(52,181,1,0.6)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(cx, cy, s * 1.3, s * 1.3, 0, 0, Math.PI * 2); ctx.stroke(); }
+                    } else if (t === '^' || t === 'v') {
+                        // Spikes
+                        ctx.fillStyle = '#ff5555'; ctx.beginPath();
+                        if (t === '^') { ctx.moveTo(sx + TILE * 0.5, sy + TILE * 0.15); ctx.lineTo(sx + TILE * 0.15, sy + TILE * 0.85); ctx.lineTo(sx + TILE * 0.85, sy + TILE * 0.85); }
+                        else { ctx.moveTo(sx + TILE * 0.5, sy + TILE * 0.85); ctx.lineTo(sx + TILE * 0.15, sy + TILE * 0.15); ctx.lineTo(sx + TILE * 0.85, sy + TILE * 0.15); }
+                        ctx.closePath(); ctx.fill();
+                    } else if (t === 'o' || t === 'O') {
+                        // Sawblades
+                        const cx = sx + TILE / 2, cy = sy + TILE / 2;
+                        const radius = (t === 'o') ? 16 : 24;
+                        const time = performance.now() / 500;
+                        ctx.save(); ctx.translate(cx, cy); ctx.rotate(time);
+                        ctx.fillStyle = '#888';
+                        const teeth = (t === 'o') ? 10 : 12;
+                        for (let i = 0; i < teeth; i++) {
+                            const angle = (i / teeth) * Math.PI * 2;
+                            const x1 = Math.cos(angle) * (radius + (t === 'o' ? 5 : 7));
+                            const y1 = Math.sin(angle) * (radius + (t === 'o' ? 5 : 7));
+                            const x2 = Math.cos(angle + Math.PI / teeth) * radius;
+                            const y2 = Math.sin(angle + Math.PI / teeth) * radius;
+                            ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(x1, y1); ctx.lineTo(x2, y2); ctx.closePath(); ctx.fill();
+                        }
+                        ctx.beginPath(); ctx.arc(0, 0, radius - (t === 'o' ? 6 : 8), 0, Math.PI * 2); ctx.fillStyle = '#555'; ctx.fill(); ctx.stroke();
+                        ctx.restore();
+                    } else if (t === 'c') {
+                        // Small coin
+                        ctx.fillStyle = 'yellow'; ctx.beginPath(); ctx.ellipse(sx + TILE / 2, sy + TILE / 2, 6, 8, 0, 0, Math.PI * 2); ctx.fill();
+                    } else if (t === 'C') {
+                        // Large coin
+                        ctx.fillStyle = 'gold'; ctx.beginPath(); ctx.ellipse(sx + TILE / 2, sy + TILE / 2, 12, 16, 0, 0, Math.PI * 2); ctx.fill(); ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 3; ctx.stroke();
+                    } else if (['y', 'm', 'r', 'b'].includes(t)) {
+                        // Orbs
+                        const cx = sx + TILE / 2, cy = sy + TILE / 2, radius = 14;
+                        ctx.beginPath(); ctx.arc(cx, cy, radius + 4, 0, Math.PI * 2); ctx.strokeStyle = 'white'; ctx.lineWidth = 3; ctx.stroke(); ctx.beginPath(); ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+                        const fillMap = { y: 'yellow', m: 'magenta', r: 'red', b: 'cyan' };
+                        ctx.fillStyle = fillMap[t]; ctx.fill();
+                    } else if (['Y', 'M', 'R', 'B'].includes(t)) {
+                        // Pads
+                        const tileCol = x, tileRow = y;
+                        const aboveIsSolid = world.tiles[tileRow - 1] && world.tiles[tileRow - 1][tileCol] === '#';
+                        const colMap = { Y: 'yellow', M: 'magenta', R: 'red', B: 'cyan' };
+                        ctx.fillStyle = colMap[t];
+                        if (aboveIsSolid) {
+                            ctx.fillRect(sx + 4, sy + 4, TILE - 8, 8);
+                            ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 8; ctx.fillRect(sx + 4, sy + 2, TILE - 8, 4); ctx.shadowBlur = 0;
+                        } else {
+                            ctx.fillRect(sx + 4, sy + TILE - 12, TILE - 8, 8);
+                            ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = 8; ctx.fillRect(sx + 4, sy + TILE - 14, TILE - 8, 4); ctx.shadowBlur = 0;
+                        }
+                    } else if (t === 'P') {
+                        // Portal
+                        const cx = sx + TILE / 2, cy = sy + TILE / 2, radius = 32, time = performance.now() / 500;
+                        ctx.save(); ctx.translate(cx, cy); ctx.rotate(time % (Math.PI * 2));
+                        const outerColor = modeFlying ? '#34B501' : '#ab0fd7';
+                        const innerColor = modeFlying ? '#ab0fd7' : '#34B501';
+                        ctx.strokeStyle = outerColor; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, 0, radius, 0, Math.PI * 1.5); ctx.stroke();
+                        ctx.rotate(-time * 1.5); ctx.strokeStyle = innerColor; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(0, 0, radius * 0.5, 0, Math.PI); ctx.stroke();
+                        ctx.restore();
+                    }
+                }
+            }
+
+            // draw player
+            const px = player.x - camera.x; const py = player.y - camera.y;
+            drawPlayer(ctx, px, py, player.w, player.h, player.facing, bodyColor, bodyColorValue, eyeColor, isBlinking);
+        }
+
+        /* debug update */
+        function updateDebug() {
+            try {
+                const centerX = Math.floor((player.x + player.w / 2) / TILE);
+                const centerY = Math.floor((player.y + player.h / 2) / TILE);
+                devInfo.innerText = `world=${world.width}x${world.height}\nplayer=${player.x.toFixed(1)},${player.y.toFixed(1)}\nplayerTile=${centerX},${centerY}\ncamera=${camera.x.toFixed(1)},${camera.y.toFixed(1)}\nisGameOver=${isGameOver}\nmodeFlying=${modeFlying}\ncheckpoint=${checkpoint ? checkpoint.x + ',' + checkpoint.y : 'none'}`;
+            } catch (e) {
+                devInfo.innerText = `dev overlay error: ${e.message}`;
+            }
+        }
+
+        /* ===== Initialize ===== */
+        requestAnimationFrame(update);
+    </script>
+</body>
+
+</html>
